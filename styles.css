@@ -1,6 +1,6 @@
 .btn {
 display: block;
-margin: 20px;
+margin: 20px auto;
 padding: 20px 40px;
 font-size: 50px;
 }
