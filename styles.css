@@ -1,8 +1,6 @@
 .btn {
-position: absolute;
-top: 0;
-left: 0;
-width: 200px;
-height: 100px;
+display: block;
+margin: 20px;
+padding: 20px 40px;
 font-size: 50px;
 }
