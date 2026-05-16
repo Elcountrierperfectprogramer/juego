@@ -1,4 +1,9 @@
+body {
+background-color: brown;
+}
+
 .btn {
+text-align: center;
 color: blue;
 background-color: black;
 display: block;
