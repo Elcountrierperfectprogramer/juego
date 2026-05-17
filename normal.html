@@ -1,3 +1,4 @@
+<!-- 2D game -->
 <!—  Normal y good —>
 
 <!DOCTYPE html>
@@ -230,16 +231,18 @@ function spawnEnemy() {
     });
 }
 
+// === Mejora de enemigos: ===
+
+setInterval(() => {
+        spawnEnemy();
+    }, 1000);
+
 // ========== ACTUALIZAR LÓGICA ==========
 function update() {
     if (!gameRunning) return;
     
     if (player.shootCooldown > 0) player.shootCooldown--;
     if (player.invincibleFrames > 0) player.invincibleFrames--;
-    
-    setInterval(() => {
-        spawnEnemy();
-    }, 1000);
     
     // Mover balas
     for(let i = 0; i < bullets.length; i++) {
