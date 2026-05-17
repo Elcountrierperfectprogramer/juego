@@ -231,23 +231,28 @@ function spawnEnemy() {
     });
 }
 
-// === Mejora de enemigos: ===
-let intervalAparence = 1000 - score;
+// ========== SPAWN DE ENEMIGOS (DINÁMICO) ==========
+let spawnTimer = 0;
+let spawnDelay = 60; // frames iniciales (~1 segundo a 60fps)
 
-setInterval(() => {
+function updateSpawner() {
+    if (!gameRunning) return;
+    spawnTimer++;
+    if (spawnTimer >= spawnDelay) {
         spawnEnemy();
-    }, intervalAparence);
+        spawnTimer = 0;
+        // Aumenta dificultad: mínimo 15 frames (0.25s)
+        if (spawnDelay > 15) {
+            spawnDelay = Math.max(15, 60 - Math.floor(score / 200));
+        }
+    }
+}
 
 // ========== ACTUALIZAR LÓGICA ==========
 function update() {
     if (!gameRunning) return;
     
-    // Actualización de el intervalo de aparición de enemigos
-    if (intervalAparence < 10) {
-        intervalAparence = 10;
-    } else {
-        intervalAparence -= Math.random() * score;
-    }
+    updateSpawner();
     
     if (player.shootCooldown > 0) player.shootCooldown--;
     if (player.invincibleFrames > 0) player.invincibleFrames--;
