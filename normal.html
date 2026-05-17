@@ -235,7 +235,7 @@ function spawnEnemy() {
 
 setInterval(() => {
         spawnEnemy();
-    }, 1000);
+    }, 1000 - enemies[i].speedY);
 
 // ========== ACTUALIZAR LÓGICA ==========
 function update() {
