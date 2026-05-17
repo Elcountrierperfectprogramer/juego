@@ -246,7 +246,7 @@ function update() {
     if (intervalAparence < 10) {
         intervalAparence = 10;
     } else {
-        intervalAparence ++;
+        intervalAparence -= Math.random() * score;
     }
     
     if (player.shootCooldown > 0) player.shootCooldown--;
