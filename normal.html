@@ -232,14 +232,22 @@ function spawnEnemy() {
 }
 
 // === Mejora de enemigos: ===
+let intervalAparence = 1000 - enemies[i].speedY;
 
 setInterval(() => {
         spawnEnemy();
-    }, 1000 - enemies[i].speedY);
+    }, intervalAparence);
 
 // ========== ACTUALIZAR LÓGICA ==========
 function update() {
     if (!gameRunning) return;
+    
+    // Actualización de el intervalo de aparición de enemigos
+    if (intervalAparence < 10) {
+        intervalAparence = 10;
+    } else {
+    intervalAparence ++;
+    }
     
     if (player.shootCooldown > 0) player.shootCooldown--;
     if (player.invincibleFrames > 0) player.invincibleFrames--;
