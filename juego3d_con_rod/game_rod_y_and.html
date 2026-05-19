@@ -75,7 +75,7 @@ const light = new THREE.AmbientLight(0xff6666);
 scene.add(light);
 
 // Plano
-const geometry = new THREE.PlaneGeometry( 1, 1 );
+const geometry = new THREE.PlaneGeometry( 10, 10 );
 const material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
 const plane = new THREE.Mesh( geometry, material );
 plane.rotation.x = Math.PI * 0.03
