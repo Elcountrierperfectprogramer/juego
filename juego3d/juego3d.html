@@ -58,6 +58,11 @@ body { background: blue; }
 <script type="module">
 import * as THREE from 'three';
 
+// Personaje 3D
+const loader = new GLTFLoader();
+const gltf = await loader.loadAsync( 'https://github.com/Elcountrierperfectprogramer/juego/blob/main/juego3d/avatar_completo_1000.glb' );
+scene.add(gltf.scene);
+
 // Variables
 const largo = 64;
 let paredZ = -10;
