@@ -59,7 +59,11 @@ body { background: blue; }
 import * as THREE from 'three';
 
 // Variables
-
+const biomas = {
+  desierto: { color: 0xc2b280, alturaMax: 5, textura: 'arena.jpg', arboles: false },
+  bosque: { color: 0x5c9e5c, alturaMax: 10, textura: 'cesped.jpg', arboles: true },
+  nieve: { color: 0xe0e0e0, alturaMax: 8, textura: 'nieve.jpg', arboles: false }
+};
 // Escena
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
