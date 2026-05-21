@@ -61,6 +61,13 @@ body { background: blue; }
 import * as THREE from 'three';
 import { GLTFLoader } from 'GLTFLoader';
 
+// Escena
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
 // Cargar personaje
 async function init() {
 // Personaje 3D
@@ -73,13 +80,6 @@ scene.add(gltf.scene);
 // Variables
 const largo = 64;
 let paredZ = -10;
-
-// Escena
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
 
 // Fondo
 scene.background = new THREE.Color(0x6666ff);
