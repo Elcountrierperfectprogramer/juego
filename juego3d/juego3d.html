@@ -51,17 +51,23 @@ body { background: blue; }
 <script type="importmap">
     {
         "imports": {
-            "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+            "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+            "GLTFLoader": "https://unpkg.com/three@0.128.0/examples/jsm/loaders/GLTFLoader.js"
+    
         }
     }
 </script>
 <script type="module">
 import * as THREE from 'three';
+import * as GLTFLoader from 'GLTFLoader';
 
+// Cargar personaje
+async function init() {
 // Personaje 3D
 const loader = new GLTFLoader();
 const gltf = await loader.loadAsync( 'https://github.com/elcountrierperfectprogramer/juego/blob/main/juego3d/avatar_completo_1000.glb' );
 scene.add(gltf.scene);
+}
 
 // Variables
 const largo = 64;
@@ -98,6 +104,9 @@ scene.add(pared);
 // Cámara (para ver el suelo y la pared)
 camera.position.set(0, 5, 15);
 camera.lookAt(0, 0, -5);
+
+// Poner personaje
+init();
 
 // Variables del joystick
 const joystickBase = document.getElementById('joystickBase');
