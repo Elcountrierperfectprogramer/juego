@@ -73,7 +73,7 @@ async function init() {
 const loader = new GLTFLoader();
 const gltf = await loader.loadAsync( 'https://raw.githubusercontent.com/elcountrierperfectprogramer/juego/main/juego3d/avatar_completo_1000.glb' );
 gltf.position.set(0, 0, 0);
-scene.add(gltf);
+scene.add(gltf.scene);
 }
 
 // Variables
@@ -84,8 +84,9 @@ let paredZ = -10;
 scene.background = new THREE.Color(0x6666ff);
 
 // Luz
-const light = new THREE.AmbientLight(0xff6666);
-scene.add(light);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(5, 10, 7);
+scene.add(directionalLight);
 
 // SUELO (horizontal)
 const sueloGeo = new THREE.BoxGeometry(20, 0.2, 20);
