@@ -66,6 +66,7 @@ async function init() {
 // Personaje 3D
 const loader = new GLTFLoader();
 const gltf = await loader.loadAsync( 'https://raw.githubusercontent.com/elcountrierperfectprogramer/juego/main/juego3d/avatar_completo_1000.glb' );
+gltf.position.set(0, 0, 0);
 scene.add(gltf.scene);
 }
 
