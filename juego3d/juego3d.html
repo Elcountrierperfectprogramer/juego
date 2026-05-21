@@ -105,9 +105,6 @@ scene.add(pared);
 camera.position.set(0, 5, 15);
 camera.lookAt(0, 0, -5);
 
-// Poner personaje
-init();
-
 // Variables del joystick
 const joystickBase = document.getElementById('joystickBase');
 const joystickThumb = document.getElementById('joystickThumb');
@@ -240,6 +237,8 @@ camera.rotation.x = -cameraRotationX;
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 }
+// Poner personaje
+init();
 animate();
 </script>
 </body>
