@@ -51,15 +51,14 @@ body { background: blue; }
 <script type="importmap">
     {
         "imports": {
-            "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-            "GLTFLoader": "https://unpkg.com/three@0.128.0/examples/jsm/loaders/GLTFLoader.js"
+            "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
     
         }
     }
 </script>
 <script type="module">
 import * as THREE from 'three';
-import { GLTFLoader } from 'GLTFLoader';
+import { GLTFLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
 
 // Escena
 const scene = new THREE.Scene();
@@ -74,7 +73,7 @@ async function init() {
 const loader = new GLTFLoader();
 const gltf = await loader.loadAsync( 'https://raw.githubusercontent.com/elcountrierperfectprogramer/juego/main/juego3d/avatar_completo_1000.glb' );
 gltf.position.set(0, 0, 0);
-scene.add(gltf.scene);
+scene.add(gltf);
 }
 
 // Variables
@@ -237,8 +236,11 @@ camera.rotation.x = -cameraRotationX;
     renderer.render(scene, camera);
 }
 // Poner personaje
-init();
+async function game() {
+await init();
 animate();
+}
+game();
 </script>
 </body>
 </html>
