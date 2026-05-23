@@ -65,7 +65,7 @@ pared.position.set(0, 0.5, paredZ);
 scene.add(pared);
 
 // Cámara (para ver el suelo y la pared)
-camera.position.set(0, 5, 15);
+camera.position.set(3, 5, 15);
 camera.lookAt(0, 0, -5);
 
 // Variables del joystick
@@ -193,6 +193,7 @@ camera.lookAt(0, 0, 0);
 function animate() {
     cameraGroup.rotation.y = -cameraRotationY;
 camera.rotation.x = -cameraRotationX;
+    camera.position.y -= 1;
     camera.position.z += joydeltaY;
     camera.position.x += joydeltaX;
     requestAnimationFrame(animate);
