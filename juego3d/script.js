@@ -193,8 +193,8 @@ camera.lookAt(0, 0, 0);
 function animate() {
     cameraGroup.rotation.y = -cameraRotationY;
     camera.rotation.x = -cameraRotationX;
-    cameraGroup.position.y -= 10;
-    camera.position.y += joydeltaY;
+    cameraGroup.position.y -= 100;
+    camera.position.z += joydeltaY;
     camera.position.x += joydeltaX;
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
