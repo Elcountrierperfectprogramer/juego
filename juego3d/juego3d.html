@@ -67,16 +67,14 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-/*
 // Cargar personaje
 async function init() {
 // Personaje 3D
 const loader = new GLTFLoader();
-const gltf = await loader.loadAsync( 'https://raw.githubusercontent.com/elcountrierperfectprogramer/juego/main/juego3d/avatar_completo_1000.glb' );
+const gltf = await loader.loadAsync( 'https://raw.githubusercontent.com/elcountrierperfectprogramer/juego/main/juego3d/models/avatar_completo_1000.glb' );
 gltf.position.set(0, 0, 0);
 scene.add(gltf.scene);
 }
-*/
 
 // Variables
 const largo = 64;
@@ -240,7 +238,7 @@ camera.rotation.x = -cameraRotationX;
 }
 // Poner personaje
 async function game() {
-// await init();
+await init();
 animate();
 }
 game();
