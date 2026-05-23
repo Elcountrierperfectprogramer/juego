@@ -41,6 +41,7 @@ const loader = new GLTFLoader();
 // Variables
 const largo = 64;
 let paredZ = -10;
+let state_G = true;
 
 // Fondo
 scene.background = new THREE.Color(0x6666ff);
@@ -183,6 +184,15 @@ function isTouchOnJoystick(touchX, touchY) {
            touchY >= rect.top && touchY <= rect.bottom;
 }
 
+function update() {
+    if (state_G) {
+        cameraGroup.position.y -= 1;
+    }
+    if (cameraGroup.position.y == 0) {
+        state_G = false;
+    }
+}
+
 const cameraGroup = new THREE.Group();
 cameraGroup.add(camera);
 scene.add(cameraGroup);
@@ -193,7 +203,6 @@ camera.lookAt(0, 0, 0);
 function animate() {
     cameraGroup.rotation.y = -cameraRotationY;
     camera.rotation.x = -cameraRotationX;
-    cameraGroup.position.y -= 1;
     camera.position.z += joydeltaY;
     camera.position.x += joydeltaX;
     requestAnimationFrame(animate);
