@@ -199,6 +199,6 @@ function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 }
-// Poner personaje
+// Poner personaje y animar
 init();
 animate();
