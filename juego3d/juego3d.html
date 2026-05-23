@@ -67,6 +67,7 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+/*
 // Cargar personaje
 async function init() {
 // Personaje 3D
@@ -75,6 +76,7 @@ const gltf = await loader.loadAsync( 'https://raw.githubusercontent.com/elcountr
 gltf.position.set(0, 0, 0);
 scene.add(gltf.scene);
 }
+*/
 
 // Variables
 const largo = 64;
@@ -238,7 +240,7 @@ camera.rotation.x = -cameraRotationX;
 }
 // Poner personaje
 async function game() {
-await init();
+// await init();
 animate();
 }
 game();
