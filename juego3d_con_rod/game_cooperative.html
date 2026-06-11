@@ -1,0 +1,37 @@
+<!--  Rod y yo Game -->
+
+<!--🚀 3D - El Caos en Tercera Dimensión-->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚀 3D - El Caos en Tercera Dimensión</title>
+<link rel="stylesheet" href="styles/style_1.css" />
+</head>
+<body>
+  <div id="joystickContainer">
+    <div id="joystickBase">
+        <div id="joystickThumb"></div>
+   </div>
+  </div>
+  <div id="menu" width="800" height="331">
+  <img src="../assets/imagenes/menu.jpg" id="fotoMenu">
+<img src="../assets/imagenes/menu_play.jpg" id="play" onclick="">
+  </div>
+<canvas id="myCanvas" width="1000" height="1200"></canvas>
+
+<script src="../assets/modulos/vconsole.min.js"></script>
+<script>
+    // Activar consola visual en iPhone
+    var vConsole = new VConsole();
+    
+    // También puedes capturar errores manualmente
+    window.onerror = function(msg, url, line, col, error) {
+        console.error('ERROR:', msg, 'en línea', line);
+        return false;
+    };
+</script>
+<script src="js/script.js" type="module"></script>
+</body>
+</html>
