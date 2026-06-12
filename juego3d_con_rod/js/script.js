@@ -1,4 +1,4 @@
-import * as THREE from "../../assets/modulos/three.module.js";
+import * as THREE from "https://unpkg.com/three@0.128.0/build/three.module.js";
 import { gameState, hideStart } from "./menu.js";
 import { getJoydeltaX, getJoydeltaY, getRotationDelta } from './input.js';
 
