@@ -1,0 +1,92 @@
+<!--  Rod y yo Game -->
+
+<!--Sobrevive en la 3 Dimension-->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supervivencia 3D</title>
+<link rel="stylesheet" href="styles/style_1.css" />
+</head>
+<body>
+  <div id="joystickContainer">
+    <div id="joystickBase">
+        <div id="joystickThumb"></div>
+   </div>
+  </div>
+  </div>
+    <div id="settingsPanel">
+    </div>
+    
+  <div id="menu" width="800" height="331">
+  <!-- En Game_cooperative.html, dentro del menú -->
+<div id="multiplayer-buttons">
+    <button id="HostGame">🎮 Crear Sala</button>
+    <button id="JoinGame">🔗 Unirse a Sala</button>
+</div>
+
+<!-- Input para pegar el código (opcional) -->
+<input type="text" id="IpInput" placeholder="Pega el código aquí" style="display:none;">
+  
+  <img src="../assets/imagenes/menu.jpg" id="fotoMenu">
+  
+<img src="../assets/imagenes/menu_play.jpg" id="play" onclick="">
+
+<img src="../assets/imagenes/casilla.png" id="settings">
+
+<p id="ParrafoInImg"> Ajustes </p>
+
+<canvas id="myCanvas" width="1000" height="1200"></canvas>
+
+</div>
+
+<div id="MenuWorlds">
+<button id="CreateNewWorld"> Worlds </button>
+<button id="NewWorld"> Create a World </button>
+
+<button id="Local"> Juego Multijugador Local(beta) </button>
+</div>
+
+<div id="Toggle-test" class="toggle-off">
+<span class="toggle"> Edit </span>
+</div>
+
+<div id="Pos"> X: 0, Y: 0, Z: 0</div>
+
+<div id="Recolect"> </div>
+
+<img src="../assets/imagenes/Craft.PNG" id="Craft">
+<div id="Recetas">
+<p id="TextoReceta"> Plano </p>
+<img src="../assets/imagenes/Close_Craft.jpg" id="IMGClose_Craft">
+
+<div id="Creation_Objects">
+<img src="../assets/imagenes/Hacha.jpg">
+</div>
+</div>
+
+  <button id="Close_Craft"> Cerrar </button>
+      <button id="Close_Recetas"> ❌ Cerrar </button>   <!-- 🔑 NUEVO -->
+
+<script src="../assets/modulos/vconsole.min.js"></script>
+<script>
+    // Activar consola visual en iPhone
+    let vConsole = new VConsole();
+    
+    // También puedes capturar errores manualmente
+    window.onerror = function(msg, url, line, col, error) {
+        window.error('ERROR:', msg, 'en línea', line);
+        return false;
+    };
+</script>
+
+<script src="../assets/modulos/eruda.js"></script>
+<script>
+    eruda.init();  // ← ¡Inicializar antes de usarlo!
+    console.log('✅ Eruda inicializado');
+</script>
+
+<script src="js/main.js" type="module"></script>
+</body>
+</html>
