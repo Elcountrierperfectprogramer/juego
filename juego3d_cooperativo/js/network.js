@@ -27,14 +27,15 @@ function detectarServidor() {
     }
 
     // 🔑 GitHub Pages → servidor en OneCompiler
+    /*
     if (hostname.endsWith('github.io')) {
         return 'https://3000-99f54fee2521-0af456a2.sandboxed.page';
     }
+    */
 
     // 🔑 Cualquier otro caso → preguntar
     return prompt(
-        '🌐 URL del servidor:',
-        'https://3000-99f54fee2521-0af456a2.sandboxed.page'
+        '🌐 URL del servidor?:'
     );
 }
 
