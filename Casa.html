@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Mi Casa en 3D - Three.js</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #1a1a1a; touch-action: none; }
+        canvas { display: block; }
+        
+        .joystick-wrapper {
+            position: absolute;
+            bottom: 30px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            touch-action: none;
+            user-select: none;
+            z-index: 100;
+        }
+        #joystick-left { left: 30px; }
+        #knob-left { background: rgba(100, 200, 255, 0.6); }
+        #joystick-right { right: 30px; border-color: rgba(255, 200, 100, 0.5); }
+        #knob-right { background: rgba(255, 200, 100, 0.6); }
+
+        .joystick-knob {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            touch-action: none;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        #instructions {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.8);
+            font-family: sans-serif;
+            font-size: 14px;
+            text-align: center;
+            pointer-events: none;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="instructions">🏡 Mi Casa: Izquierda = Caminar | Derecha = Mirar</div>
+
+    <div id="joystick-left" class="joystick-wrapper">
+        <div id="knob-left" class="joystick-knob"></div>
+    </div>
+
+    <div id="joystick-right" class="joystick-wrapper">
+        <div id="knob-right" class="joystick-knob"></div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // 1. Configuración de la escena
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a1a);
+        scene.fog = new THREE.FogExp2(0x1a1a1a, 0.015);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+        
+        // Variables de estado de la cámara
+        let cameraYaw = 0;
+        let cameraPitch = 0;
+        const cameraHeight = 1.6;
+
+        // Posición inicial: en la sala, mirando hacia la cocina
+        camera.position.set(0, cameraHeight, 4.0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        // 2. Iluminación
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); // Luz ambiental alta para interiores
+        scene.add(ambientLight);
+
+        // Luz principal (como si viniera de las ventanas)
+        const mainLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
+        mainLight.position.set(5, 8, 5);
+        mainLight.castShadow = true;
+        mainLight.shadow.mapSize.width = 1024;
+        mainLight.shadow.mapSize.height = 1024;
+        scene.add(mainLight);
+
+        // Luz de relleno para las zonas oscuras
+        const fillLight = new THREE.PointLight(0x88aaff, 0.5, 15);
+        fillLight.position.set(-3, 3, 0);
+        scene.add(fillLight);
+
+        // 3. Materiales
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+        const stoneWallMat = new THREE.MeshStandardMaterial({ color: 0xd2b48c, roughness: 0.8 }); // Pared de piedra (beige)
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.6 }); // Suelo de terrazo
+        const woodMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.7 }); // Madera
+        const darkWoodMat = new THREE.MeshStandardMaterial({ color: 0x4a2e1b, roughness: 0.8 }); // Madera oscura
+        const metalMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.3, metalness: 0.8 }); // Metal
+        const blackMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5 }); // Negro (nevera)
+        const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 }); // Blanco
+
+        // 4. Suelo y Techo
+        const floorGeo = new THREE.PlaneGeometry(12, 16);
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        const ceilingGeo = new THREE.PlaneGeometry(12, 16);
+        const ceiling = new THREE.Mesh(ceilingGeo, wallMat);
+        ceiling.rotation.x = Math.PI / 2;
+        ceiling.position.y = 2.8;
+        scene.add(ceiling);
+
+        // 5. Paredes (Estructura de la casa)
+        // Pared del fondo (Cocina - Foto 2)
+        const backWall = new THREE.Mesh(new THREE.BoxGeometry(12, 2.8, 0.2), wallMat);
+        backWall.position.set(0, 1.4, -7.5);
+        backWall.receiveShadow = true;
+        scene.add(backWall);
+
+        // Pared frontal (Sala - Foto 1)
+        const frontWall = new THREE.Mesh(new THREE.BoxGeometry(12, 2.8, 0.2), wallMat);
+        frontWall.position.set(0, 1.4, 7.5);
+        frontWall.receiveShadow = true;
+        scene.add(frontWall);
+
+        // Pared izquierda
+        const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.8, 15), wallMat);
+        leftWall.position.set(-6, 1.4, 0);
+        leftWall.receiveShadow = true;
+        scene.add(leftWall);
+
+        // Pared derecha (con textura de piedra)
+        const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.8, 15), stoneWallMat);
+        rightWall.position.set(6, 1.4, 0);
+        rightWall.receiveShadow = true;
+        scene.add(rightWall);
+
+        // Columna de piedra (Foto 1)
+        const column = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2.8, 1.5), stoneWallMat);
+        column.position.set(4.5, 1.4, 0);
+        column.castShadow = true;
+        column.receiveShadow = true;
+        scene.add(column);
+
+        // 6. Cocina (Foto 2 - Fondo)
+        // Barra de la cocina
+        const barGeo = new THREE.BoxGeometry(5, 0.1, 1.2);
+        const bar = new THREE.Mesh(barGeo, whiteMat);
+        bar.position.set(-1, 0.9, -4.5);
+        bar.castShadow = true;
+        bar.receiveShadow = true;
+        scene.add(bar);
+
+        // Base de la barra (bloques de piedra)
+        const barBase = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.9, 1.2), stoneWallMat);
+        barBase.position.set(-1, 0.45, -4.5);
+        barBase.castShadow = true;
+        barBase.receiveShadow = true;
+        scene.add(barBase);
+
+        // Nevera negra (derecha)
+        const fridge = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.0, 1.0), blackMat);
+        fridge.position.set(4.0, 1.0, -5.5);
+        fridge.castShadow = true;
+        fridge.receiveShadow = true;
+        scene.add(fridge);
+
+        // Encimera con objetos (simplificada)
+        const counter = new THREE.Mesh(new THREE.BoxGeometry(3, 0.9, 1.0), stoneWallMat);
+        counter.position.set(2.0, 0.45, -6.5);
+        counter.castShadow = true;
+        counter.receiveShadow = true;
+        scene.add(counter);
+
+        // Ventanas de la cocina (simuladas con planos claros)
+        const windowMat = new THREE.MeshBasicMaterial({ color: 0xcceeff });
+        const window1 = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.5), windowMat);
+        window1.position.set(0.5, 1.8, -7.4);
+        scene.add(window1);
+        
+        const window2 = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.5), windowMat);
+        window2.position.set(2.5, 1.8, -7.4);
+        scene.add(window2);
+
+        // Puerta de la entrada (con rejas)
+        const doorFrameMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
+        const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2.5, 0.1), doorFrameMat);
+        doorFrame.position.set(-2.5, 1.25, -7.4);
+        scene.add(doorFrame);
+        
+        const doorGlass = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 2.3), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        doorGlass.position.set(-2.5, 1.25, -7.35);
+        scene.add(doorGlass);
+
+        // Rejas de la puerta
+        const rejaMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        for (let i = 0; i < 3; i++) {
+            const bar = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.3, 0.05), rejaMat);
+            bar.position.set(-2.8 + i * 0.3, 1.25, -7.3);
+            scene.add(bar);
+        }
+
+        // 7. Sala/Comedor (Foto 1 - Frente)
+        // Mesa del comedor
+        const tableGeo = new THREE.BoxGeometry(2.5, 0.1, 1.5);
+        const table = new THREE.Mesh(tableGeo, woodMat);
+        table.position.set(2.0, 0.8, 2.0);
+        table.castShadow = true;
+        table.receiveShadow = true;
+        scene.add(table);
+
+        // Patas de la mesa
+        const tableLegGeo = new THREE.BoxGeometry(0.1, 0.8, 0.1);
+        const tableLegPos = [
+            { x: 1.0, z: 1.3 }, { x: 3.0, z: 1.3 },
+            { x: 1.0, z: 2.7 }, { x: 3.0, z: 2.7 }
+        ];
+        tableLegPos.forEach(pos => {
+            const leg = new THREE.Mesh(tableLegGeo, woodMat);
+            leg.position.set(pos.x, 0.4, pos.z);
+            leg.castShadow = true;
+            scene.add(leg);
+        });
+
+        // Sillas (simplificadas)
+        function createChair(x, z, rotationY = 0) {
+            const chairGroup = new THREE.Group();
+            const seat = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 0.5), woodMat);
+            seat.position.y = 0.45;
+            seat.castShadow = true;
+            chairGroup.add(seat);
+            
+            const backrest = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.05), woodMat);
+            backrest.position.set(0, 0.7, -0.22);
+            backrest.castShadow = true;
+            chairGroup.add(backrest);
+            
+            const legGeo = new THREE.BoxGeometry(0.05, 0.45, 0.05);
+            const legPos = [
+                { x: -0.2, z: -0.2 }, { x: 0.2, z: -0.2 },
+                { x: -0.2, z: 0.2 }, { x: 0.2, z: 0.2 }
+            ];
+            legPos.forEach(pos => {
+                const leg = new THREE.Mesh(legGeo, woodMat);
+                leg.position.set(pos.x, 0.225, pos.z);
+                leg.castShadow = true;
+                chairGroup.add(leg);
+            });
+            
+            chairGroup.position.set(x, 0, z);
+            chairGroup.rotation.y = rotationY;
+            return chairGroup;
+        }
+
+        scene.add(createChair(1.5, 2.0, Math.PI));
+        scene.add(createChair(2.5, 2.0, Math.PI));
+        scene.add(createChair(1.5, 1.2, 0));
+        scene.add(createChair(2.5, 1.2, 0));
+
+        // Mueble de la cocina (izquierda en Foto 1)
+        const kitchenCounter = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.9, 2.5), stoneWallMat);
+        kitchenCounter.position.set(-4.5, 0.45, 2.0);
+        kitchenCounter.castShadow = true;
+        kitchenCounter.receiveShadow = true;
+        scene.add(kitchenCounter);
+
+        // Encimera de la cocina (Foto 1)
+        const kitchenTop = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 2.6), whiteMat);
+        kitchenTop.position.set(-4.5, 0.95, 2.0);
+        kitchenTop.castShadow = true;
+        scene.add(kitchenTop);
+
+        // Objetos sobre la encimera (ollas, teteras)
+        const pot1 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.4, 16), metalMat);
+        pot1.position.set(-4.5, 1.2, 1.5);
+        pot1.castShadow = true;
+        scene.add(pot1);
+
+        const pot2 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.3, 16), whiteMat);
+        pot2.position.set(-4.0, 1.15, 2.5);
+        pot2.castShadow = true;
+        scene.add(pot2);
+
+        // Máquina de coser (Foto 2 - Izquierda)
+        const sewingMachine = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.3, 0.4), whiteMat);
+        sewingMachine.position.set(-3.5, 0.95, 3.5);
+        sewingMachine.castShadow = true;
+        scene.add(sewingMachine);
+
+        // 8. Techo: Lámparas
+        // Lámpara de la sala (Foto 1)
+        const lampGroup1 = new THREE.Group();
+        const lampBase1 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.1, 8), metalMat);
+        lampBase1.position.y = 0;
+        lampGroup1.add(lampBase1);
+        
+        const lampArm1 = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.3, 8), metalMat);
+        lampArm1.position.y = -0.15;
+        lampGroup1.add(lampArm1);
+        
+        const lampShade1 = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.5 }));
+        lampShade1.position.y = -0.35;
+        lampGroup1.add(lampShade1);
+        
+        lampGroup1.position.set(-3, 2.8, 3.5);
+        scene.add(lampGroup1);
+
+        // Lámpara de la cocina (Foto 2)
+        const lampGroup2 = new THREE.Group();
+        const lampBase2 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.1, 8), metalMat);
+        lampGroup2.add(lampBase2);
+        
+        const lampShade2 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.3, metalness: 0.5 }));
+        lampShade2.position.y = -0.3;
+        lampGroup2.add(lampShade2);
+        
+        lampGroup2.position.set(0, 2.8, -3.0);
+        scene.add(lampGroup2);
+
+        // 9. Sistema de Doble Joystick
+        const joystickLeft = document.getElementById('joystick-left');
+        const knobLeft = document.getElementById('knob-left');
+        const joystickRight = document.getElementById('joystick-right');
+        const knobRight = document.getElementById('knob-right');
+
+        let moveX = 0, moveY = 0;
+        let lookX = 0, lookY = 0;
+
+        let leftActive = false;
+        function handleLeftStart(e) { leftActive = true; handleLeftMove(e); }
+        function handleLeftMove(e) {
+            if (!leftActive) return;
+            e.preventDefault();
+            const rect = joystickLeft.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            let x = clientX - centerX;
+            let y = clientY - centerY;
+            const distance = Math.sqrt(x*x + y*y);
+            const maxRadius = 60;
+            if (distance > maxRadius) {
+                x = (x / distance) * maxRadius;
+                y = (y / distance) * maxRadius;
+            }
+            moveX = x / maxRadius;
+            moveY = y / maxRadius;
+            knobLeft.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+        }
+        function handleLeftEnd() {
+            leftActive = false; moveX = 0; moveY = 0;
+            knobLeft.style.transform = `translate(-50%, -50%)`;
+        }
+
+        let rightActive = false;
+        function handleRightStart(e) { rightActive = true; handleRightMove(e); }
+        function handleRightMove(e) {
+            if (!rightActive) return;
+            e.preventDefault();
+            const rect = joystickRight.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            let x = clientX - centerX;
+            let y = clientY - centerY;
+            const distance = Math.sqrt(x*x + y*y);
+            const maxRadius = 60;
+            if (distance > maxRadius) {
+                x = (x / distance) * maxRadius;
+                y = (y / distance) * maxRadius;
+            }
+            lookX = x / maxRadius;
+            lookY = y / maxRadius;
+            knobRight.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+        }
+        function handleRightEnd() {
+            rightActive = false; lookX = 0; lookY = 0;
+            knobRight.style.transform = `translate(-50%, -50%)`;
+        }
+
+        joystickLeft.addEventListener('mousedown', handleLeftStart);
+        window.addEventListener('mousemove', handleLeftMove);
+        window.addEventListener('mouseup', handleLeftEnd);
+        joystickLeft.addEventListener('touchstart', handleLeftStart, { passive: false });
+        window.addEventListener('touchmove', handleLeftMove, { passive: false });
+        window.addEventListener('touchend', handleLeftEnd);
+
+        joystickRight.addEventListener('mousedown', handleRightStart);
+        window.addEventListener('mousemove', handleRightMove);
+        window.addEventListener('mouseup', handleRightEnd);
+        joystickRight.addEventListener('touchstart', handleRightStart, { passive: false });
+        window.addEventListener('touchmove', handleRightMove, { passive: false });
+        window.addEventListener('touchend', handleRightEnd);
+
+        const keys = { w: false, a: false, s: false, d: false, up: false, down: false, left: false, right: false };
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'w' || e.key === 'W') keys.w = true;
+            if (e.key === 's' || e.key === 'S') keys.s = true;
+            if (e.key === 'a' || e.key === 'A') keys.a = true;
+            if (e.key === 'd' || e.key === 'D') keys.d = true;
+            if (e.key === 'ArrowUp') keys.up = true;
+            if (e.key === 'ArrowDown') keys.down = true;
+            if (e.key === 'ArrowLeft') keys.left = true;
+            if (e.key === 'ArrowRight') keys.right = true;
+        });
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'w' || e.key === 'W') keys.w = false;
+            if (e.key === 's' || e.key === 'S') keys.s = false;
+            if (e.key === 'a' || e.key === 'A') keys.a = false;
+            if (e.key === 'd' || e.key === 'D') keys.d = false;
+            if (e.key === 'ArrowUp') keys.up = false;
+            if (e.key === 'ArrowDown') keys.down = false;
+            if (e.key === 'ArrowLeft') keys.left = false;
+            if (e.key === 'ArrowRight') keys.right = false;
+        });
+
+        // 10. Bucle de Animación
+        const moveSpeed = 2.5;
+        const rotateSpeed = 2.0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            let rotX = lookX;
+            let rotY = lookY;
+            if (keys.left) rotX = -1;
+            if (keys.right) rotX = 1;
+            if (keys.up) rotY = -1;
+            if (keys.down) rotY = 1;
+
+            cameraYaw -= rotX * rotateSpeed * 0.05;
+            cameraPitch -= rotY * rotateSpeed * 0.05;
+            cameraPitch = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, cameraPitch));
+
+            let mx = moveX;
+            let my = moveY;
+            if (keys.w) my = -1;
+            if (keys.s) my = 1;
+            if (keys.a) mx = -1;
+            if (keys.d) mx = 1;
+
+            const forward = new THREE.Vector3(-Math.sin(cameraYaw), 0, -Math.cos(cameraYaw));
+            const right = new THREE.Vector3(Math.cos(cameraYaw), 0, -Math.sin(cameraYaw));
+
+            camera.position.addScaledVector(forward, -my * moveSpeed * 0.05);
+            camera.position.addScaledVector(right, mx * moveSpeed * 0.05);
+
+            // Límites de la casa (para no salirse)
+            camera.position.x = Math.max(-5.5, Math.min(5.5, camera.position.x));
+            camera.position.z = Math.max(-7.0, Math.min(7.0, camera.position.z));
+            camera.position.y = cameraHeight;
+
+            camera.lookAt(
+                camera.position.x - Math.sin(cameraYaw) * Math.cos(cameraPitch),
+                camera.position.y + Math.sin(cameraPitch),
+                camera.position.z - Math.cos(cameraYaw) * Math.cos(cameraPitch)
+            );
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
