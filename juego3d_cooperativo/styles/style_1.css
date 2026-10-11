@@ -1,0 +1,299 @@
+/* Eliminar scroll en toda la página */
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* El canvas de Three.js debe ocupar toda la pantalla */
+canvas {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Menú y otros elementos flotantes */
+#menu, #joystickContainer {
+    position: fixed;
+    z-index: 10;
+}
+
+#vidas-container, #hambre-container {
+    z-index: 9;
+}
+
+/* ⬇️ AÑADE ESTO ⬇️ */
+
+/* Joystick */
+#joystickBase {
+    position: fixed;
+    bottom: 100px;
+    left: 100px;
+    width: 120px;
+    height: 120px;
+    border-radius: 60px;
+    background: rgba(255,255,255,0.3);
+    border: 2px solid white;
+    display: none;
+}
+
+#joystickThumb {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+    background: rgba(255,255,255,0.8);
+    top: 35px;
+    left: 35px;
+    display: none;
+}
+
+/* Menú */
+#menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: red;
+    display: block;
+    z-index: 2;
+}
+
+#fotoMenu {
+    width: 100%;
+    height: auto;
+    max-width: 700px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+#play {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 30px;
+    width: 120px;
+    height: 40px;
+    cursor: pointer;
+    z-index: 8;
+}
+
+/* Corazón (si lo usas) */
+#hearth {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    width: 50px;
+    height: 50px;
+    display: none;
+}
+
+/* Prevenir gestos táctiles no deseados */
+body {
+    touch-action: none;
+}
+
+#settings {
+    position: fixed;
+    width: 220px;
+    height: 90px;
+    left: 100px;
+    top: 66px;
+    z-index: 3;
+}
+
+#ParrafoInImg {
+    position: fixed;
+    left: ‎180px;
+    top: 85px;
+    font-size: 18px;
+    display: block;
+    z-index: 4;
+}
+
+#settingsPanel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.9);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 10;
+    display: none; /* Oculto por defecto */
+    width: 100%;
+    height: 100%;
+    max-width: 800px;
+}
+
+#Close_Craft {
+    position: fixed;
+    background-color: black;
+    top: 35px;
+    left: 30px;
+    width: 60px;
+    left: 60px;
+    z-index: 11;
+    display: none;
+}
+
+#CreateNewWorld {
+    position: fixed;
+    dislplay: none;
+    background-color: black;
+    top: 0px;
+    left: 0px;
+    width: 60px;
+    left: 60px;
+    z-index: 12;
+    font-size: 14px;
+}
+
+#Toggle-test {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    z-index: 16;
+    display: none;
+}
+
+.toggle-off {
+    z-index: 15;
+    position: absolute;
+    left: 10px;
+    top: 20px;
+    background-color: gray;
+}
+
+.toggle-on {
+    z-index: 14;
+    position: absolute;
+    left: 10px;
+    top: 20px;
+    background-color: green;
+}
+
+.toggle {
+    z-index: 1;
+}
+
+#NewWorld {
+    position: fixed;
+    z-index: 11;
+    left: 680px;
+    display: block;
+}
+
+#Pos {
+    position: absolute;
+    z-index: 3;
+    top: 3px;
+    left: 3px;
+    color: white;
+    background-color: black;
+    padding: 3px;
+    display: none;
+}
+
+#Recolect {
+    position: fixed;
+    border-radius: 30px;
+    width: 50px;
+    height: 50px;
+    radius: 10px;
+    z-index: 15;
+    top: 250px;
+    left: 625px;
+    dislpay: none;
+    background: rgba(255,255,255,0.8);
+}
+
+#Local {
+    position: fixed;
+    top: 25px;
+    ledt: 25px;
+    z-index: 12;
+    width: 90px;
+    height: 60px;
+    display: none;
+}
+
+#multiplayer-buttons {
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 20;
+}
+
+#HostGame, #JoinGame {
+    padding: 10px 20px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    border: 2px solid #00ff00;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#HostGame:hover, #JoinGame:hover {
+    background: rgba(0,255,0,0.2);
+}
+
+#Craft {
+	position: absolute;
+	display: none;
+	top: 0px;
+	left: 0px;
+	z-index: 15;
+	width: 100px;
+	height: 100px;
+}
+
+#Recetas {
+	position: fixed;
+    dislplay: none;
+    background: rgba(0, 0, 125, 1);
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 12;
+	padding: 5px;
+}
+
+#Close_Craft {
+	position: absolute;
+	top: 0px;
+	left: 680px;
+}
+
+#TextoReceta {
+	position: absolute;
+	left: 350px;
+	/*font-size: 64px;*/
+	color: white;
+	top: 0px;
+	height: 20px;
+}
+
+#Creation_Objects {
+	margin: 10px;
+	padding: 5px;
+	position: absolute;
+	display: block;
+	top: 40px;
+}
