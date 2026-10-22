@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐎 Caballo ML (Offline)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: black;
+    color: #0f0;
+    font-family: monospace;
+    padding: 10px;
+    font-size: 20px;
+    min-height: 100vh;
+  }
+  #panel {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  h1 { font-size: 28px; }
+
+  #stats, #pauseBtn {
+    width: 100%;
+    max-width: 500px;
+    height: 60px;
+    font-size: 22px;
+    font-family: monospace;
+    background-color: black;
+    color: #0f0;
+    border: 2px solid blue;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  #stats:hover, #pauseBtn:hover {
+    background-color: blue;
+    color: black;
+  }
+
+  #canv {
+    display: block;
+    width: 100%;
+    height: 60vh;
+    border: 2px solid green;
+    background-color: #001100;
+  }
+
+  #TextStat {
+    font-size: 18px;
+    margin-top: 10px;
+    white-space: pre-line;
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<div id="panel">
+  <h1>🐎 El caballo</h1>
+  <button id="stats" onclick="ChangeStats()">Mostrar estadísticas</button>
+  <button id="pauseBtn" onclick="togglePausa()">⏸️ Pausar</button>
+</div>
+
+<canvas id="canv"></canvas>
+<p id="TextStat"></p>
+
+<script>
+// ---------- SETUP ----------
+const canvas = document.getElementById("canv");
+const ctx = canvas.getContext("2d");
+const StatBtn = document.getElementById("stats");
+const TextStat = document.getElementById("TextStat");
+
+function resizeCanvas() {
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+// ---------- ESTADO ----------
+let State = false;          // mostrar estadísticas
+let pausado = false;
+let pose = 0;               // 0 normal, 1 tormenta, 2 comiendo
+let mirandoDerecha = true;
+let NumeroHambre = 39;
+let Factor = 0;
+let FactorTormenta = 1;
+let TextoHambre = "";
+
+const caballo = {
+  x: 100,
+  y: 100,
+  Hambre: 30,
+  TargetX: null,
+  TargetY: null,
+  ComidasRestantes: 1,
+  TiempoSinComer: 0
+};
+
+const comidas = [];
+for (let i = 0; i < 5; i++) {
+  comidas.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height
+  });
+}
+
+// ---------- DIBUJO ----------
+function dibujarCaballo(x, y) {
+  ctx.save();
+  ctx.translate(x, y);
+  if (!mirandoDerecha) ctx.scale(-1, 1);
+
+  // Emoji como sprite (puedes cambiarlo por drawImage cuando tengas la imagen)
+  ctx.font = "32px serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  let emoji = "🐎";
+  if (pose === 2) emoji = "🐴"; // comiendo
+  else if (pose === 1) emoji = "🏇"; // tormenta
+
+  ctx.fillText(emoji, 0, 0);
+  ctx.restore();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Comidas
+  ctx.font = "24px serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  for (const c of comidas) {
+    ctx.fillText("🌿", c.x, c.y);
+  }
+
+  // Caballo
+  dibujarCaballo(caballo.x, caballo.y);
+}
+
+// ---------- LÓGICA ----------
+function update() {
+  Factor = (Math.abs(caballo.Hambre) / 40) + 1;
+  pose = 0;
+
+  // Dirección
+  if (caballo.TargetX !== null) {
+    if (caballo.x > caballo.TargetX) mirandoDerecha = false;
+    else if (caballo.x < caballo.TargetX) mirandoDerecha = true;
+  }
+
+  const tieneHambre = caballo.Hambre > NumeroHambre;
+
+  if ((tieneHambre || caballo.ComidasRestantes > 0) && comidas.length > 0) {
+    TextoHambre = "El caballo tiene hambre";
+
+    // Buscar comida más cercana
+    let MasCerca = null;
+    let MinDist = Infinity;
+    let MinDX = 0, MinDY = 0;
+
+    for (const c of comidas) {
+      const dx = caballo.x - c.x;
+      const dy = caballo.y - c.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < MinDist) {
+        MinDist = dist;
+        MinDX = dx;
+        MinDY = dy;
+        MasCerca = c;
+      }
+    }
+
+    // Moverse hacia ella
+    caballo.x -= (MinDX / 100) * Factor;
+    caballo.y -= (MinDY / 100) * Factor;
+
+    // Comer si está cerca
+    if (MinDist < 15 && MasCerca) {
+      const idx = comidas.indexOf(MasCerca);
+      if (idx !== -1) comidas.splice(idx, 1);
+      caballo.Hambre -= 5;
+      caballo.ComidasRestantes -= 1;
+      pose = 2;
+    }
+  } else {
+    TextoHambre = "El caballo no tiene hambre y deambula";
+
+    if (caballo.TiempoSinComer > 10) {
+      TextoHambre = "¡El caballo siente la tormenta y corre!";
+      pose = 1;
+      FactorTormenta = 2.5;
+    } else {
+      FactorTormenta = 1;
+    }
+
+    // Elegir objetivo si no tiene
+    if (caballo.TargetX === null || caballo.TargetY === null) {
+      caballo.TargetX = Math.random() * canvas.width;
+      caballo.TargetY = Math.random() * canvas.height;
+    }
+
+    const dx = caballo.x - caballo.TargetX;
+    const dy = caballo.y - caballo.TargetY;
+    const total = Math.hypot(dx, dy);
+
+    caballo.x -= dx * 0.01 * Factor * FactorTormenta;
+    caballo.y -= dy * 0.01 * Factor * FactorTormenta;
+
+    if (total < 13) {
+      caballo.TargetX = Math.random() * canvas.width;
+      caballo.TargetY = Math.random() * canvas.height;
+    }
+  }
+
+  // Limitar al canvas
+  caballo.x = Math.max(10, Math.min(canvas.width - 10, caballo.x));
+  caballo.y = Math.max(10, Math.min(canvas.height - 10, caballo.y));
+
+  // Deseo de más comidas
+  if (caballo.Hambre > NumeroHambre && caballo.ComidasRestantes < 3) {
+    caballo.ComidasRestantes = Math.floor(Math.random() * 3) + 1;
+  }
+
+  // Empujar comidas al centro (tu función original)
+  empujarComidasAlCentro();
+
+  // Texto
+  if (State) {
+    TextStat.textContent =
+      `Posición: (${Math.floor(caballo.x)}, ${Math.floor(caballo.y)})\n` +
+      `Hambre: ${Math.floor(caballo.Hambre)}\n` +
+      `${TextoHambre} (quiere ${caballo.ComidasRestantes} hierbas)`;
+  } else {
+    TextStat.textContent = "";
+  }
+}
+
+function empujarComidasAlCentro() {
+  const margen = 15;
+  const fuerza = 0.5;
+  for (const c of comidas) {
+    if (c.x < margen) c.x += (margen - c.x) * fuerza;
+    else if (c.x > canvas.width - margen) c.x -= (c.x - (canvas.width - margen)) * fuerza;
+    if (c.y < margen) c.y += (margen - c.y) * fuerza;
+    else if (c.y > canvas.height - margen) c.y -= (c.y - (canvas.height - margen)) * fuerza;
+  }
+}
+
+// ---------- INTERVALOS ----------
+setInterval(() => {
+  if (caballo.Hambre < NumeroHambre) caballo.TiempoSinComer += 1;
+  else caballo.TiempoSinComer = 0;
+}, 1000);
+
+setInterval(() => {
+  // Añadir comida si hay pocas
+  if (comidas.length < 15) {
+    const veces = Math.max(1, Math.floor(caballo.Hambre / 5));
+    for (let i = 0; i < veces && comidas.length < 21; i++) {
+      const guia = comidas[Math.floor(Math.random() * comidas.length)] || { x: canvas.width/2, y: canvas.height/2 };
+      comidas.push({
+        x: guia.x + (Math.random() * 40 - 20),
+        y: guia.y + (Math.random() * 40 - 20)
+      });
+    }
+  }
+  NumeroHambre = 35 + (Math.random() * 10 - 5);
+  caballo.Hambre += 5;
+}, 3000);
+
+// ---------- LOOP ----------
+function loop() {
+  if (!pausado) {
+    update();
+    draw();
+  }
+  requestAnimationFrame(loop);
+}
+
+// ---------- BOTONES ----------
+function ChangeStats() {
+  State = !State;
+  StatBtn.textContent = State ? "Quitar estadísticas" : "Mostrar estadísticas";
+}
+
+function togglePausa() {
+  pausado = !pausado;
+  document.getElementById("pauseBtn").textContent = pausado ? "▶️ Reanudar" : "⏸️ Pausar";
+}
+
+// ---------- INICIO ----------
+loop();
+</script>
+</body>
+</html>
