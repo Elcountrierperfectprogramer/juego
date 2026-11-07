@@ -191,7 +191,8 @@ body {
 #NewWorld {
     position: fixed;
     z-index: 11;
-    left: 680px;
+    left: 500px;
+	top: 100px;
     display: block;
 }
 
